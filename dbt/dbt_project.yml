@@ -1,0 +1,37 @@
+name: aw_analytics
+version: 1.0.0
+config-version: 2
+
+profile: aw_analytics
+
+model-paths: ["models"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+macro-paths: ["macros"]
+seed-paths: ["seeds"]
+analysis-paths: ["analyses"]
+target-path: target
+clean-targets: ["target", "dbt_packages", "logs"]
+
+models:
+  aw_analytics:
+    +persist_docs:
+      relation: true
+      columns: true
+    staging:
+      +materialized: view
+      +tags: ["staging"]
+    intermediate:
+      +materialized: view
+      +tags: ["intermediate"]
+    marts:
+      +materialized: table
+      +tags: ["marts", "udm"]
+    audit:
+      +materialized: table
+      +tags: ["audit", "reconciliation"]
+
+vars:
+  monetary_tolerance: 0.01
+  expected_dataset_count: 7
+

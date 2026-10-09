@@ -1,0 +1,74 @@
+name: dbt CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "dbt/**"
+      - "snowflake/02_raw/**"
+      - "snowflake/05_reconciliation/**"
+      - "snowflake/06_orchestration/**"
+      - ".github/workflows/dbt-cd.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: adventureworks-prod-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+    environment: prod
+    env:
+      SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: "true"
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI with OIDC
+        uses: snowflakedb/snowflake-actions@v3
+        with:
+          use-oidc: true
+
+      - name: Check CLI and connection
+        run: |
+          snow --version
+          snow connection test -x
+
+      - name: Apply idempotent RAW DDL
+        run: >-
+          snow sql
+          --filename snowflake/02_raw/020_create_raw_tables.sql
+          -x
+
+      - name: Deploy production DBT PROJECT
+        run: >-
+          snow dbt deploy AW_ANALYTICS
+          --source ./dbt
+          --default-target prod
+          --dbt-version 1.11.11
+          -x
+
+      - name: Build production models and tests
+        run: >-
+          snow dbt execute -x
+          AW_ANALYTICS build --target prod
+
+      - name: Run production reconciliation gate
+        run: >-
+          snow sql
+          --filename snowflake/05_reconciliation/050_prod_gate.sql
+          -x
+
+      - name: Deploy or update Snowflake Task
+        run: >-
+          snow sql
+          --filename snowflake/06_orchestration/060_dbt_tasks.sql
+          -x

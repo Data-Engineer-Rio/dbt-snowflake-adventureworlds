@@ -1,0 +1,23 @@
+USE ROLE ACCOUNTADMIN;
+
+CREATE STORAGE INTEGRATION AW_S3_INT
+  TYPE = EXTERNAL_STAGE
+  STORAGE_PROVIDER = 'S3'
+  ENABLED = TRUE
+  STORAGE_AWS_ROLE_ARN = '<AWS_IAM_ROLE_ARN>'
+  STORAGE_ALLOWED_LOCATIONS = ('s3://<BUCKET>/adventureworks/');
+
+GRANT USAGE ON INTEGRATION AW_S3_INT TO ROLE AW_INGEST_ROLE;
+
+DESC INTEGRATION AW_S3_INT;
+
+-- Copy STORAGE_AWS_IAM_USER_ARN and STORAGE_AWS_EXTERNAL_ID from DESC output
+-- into aws/iam/trust-policy.json.template, then update the AWS role trust policy.
+
+SELECT SYSTEM$VALIDATE_STORAGE_INTEGRATION(
+  'AW_S3_INT',
+  's3://<BUCKET>/adventureworks/',
+  '_snowflake_validation.txt',
+  'list'
+);
+

@@ -1,0 +1,43 @@
+version: 2
+
+snapshots:
+  - name: snap_customer
+    description: SCD Type 2 customer history observed from recurring full source snapshots.
+    columns:
+      - name: dbt_scd_id
+        tests: [unique, not_null]
+      - name: customer_key
+        tests: [not_null]
+      - name: dbt_valid_from
+        tests: [not_null]
+
+  - name: snap_reseller
+    description: SCD Type 2 reseller history observed from recurring full source snapshots.
+    columns:
+      - name: dbt_scd_id
+        tests: [unique, not_null]
+      - name: reseller_key
+        tests: [not_null]
+      - name: dbt_valid_from
+        tests: [not_null]
+
+  - name: snap_product
+    description: SCD Type 2 product history observed from recurring full source snapshots.
+    columns:
+      - name: dbt_scd_id
+        tests: [unique, not_null]
+      - name: product_key
+        tests: [not_null]
+      - name: dbt_valid_from
+        tests: [not_null]
+
+  - name: snap_sales_territory
+    description: SCD Type 2 territory history observed from recurring full source snapshots.
+    columns:
+      - name: dbt_scd_id
+        tests: [unique, not_null]
+      - name: sales_territory_key
+        tests: [not_null]
+      - name: dbt_valid_from
+        tests: [not_null]
+

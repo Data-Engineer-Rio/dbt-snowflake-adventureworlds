@@ -1,0 +1,35 @@
+version: 2
+
+sources:
+  - name: adventureworks_raw
+    description: Append-only AdventureWorks CSV data loaded from S3 by Snowpipe.
+    database: ADVENTUREWORKS_DE
+    schema: RAW
+    config:
+      loaded_at_field: ingested_at
+      freshness:
+        warn_after: {count: 26, period: hour}
+        error_after: {count: 50, period: hour}
+    tables:
+      - name: sales_raw
+        identifier: SALES_RAW
+        description: Raw sales order line measures and dimension keys.
+      - name: sales_order_raw
+        identifier: SALES_ORDER_RAW
+        description: Raw sales order number, line label and channel.
+      - name: customer_raw
+        identifier: CUSTOMER_RAW
+        description: Raw customer master snapshot.
+      - name: reseller_raw
+        identifier: RESELLER_RAW
+        description: Raw reseller master snapshot.
+      - name: product_raw
+        identifier: PRODUCT_RAW
+        description: Raw product master snapshot.
+      - name: date_raw
+        identifier: DATE_RAW
+        description: Raw date dimension export.
+      - name: sales_territory_raw
+        identifier: SALES_TERRITORY_RAW
+        description: Raw sales territory master snapshot.
+

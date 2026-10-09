@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: audit_reconciliation_summary
+    description: Key, row-count, aggregate and hash reconciliation between latest source batch and the UDM fact.
+    columns:
+      - name: batch_id
+        tests: [not_null]
+      - name: metric_name
+        tests: [unique, not_null]
+      - name: source_value
+        tests: [not_null]
+      - name: target_value
+        tests: [not_null]
+      - name: status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['PASS', 'FAIL']
+

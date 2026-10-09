@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: int_sales_order_line
+    description: One conformed row per sales order line with order labels, channel and derived measures.
+    columns:
+      - name: sales_order_line_key
+        tests: [unique, not_null]
+      - name: sales_order_number
+        tests: [not_null]
+      - name: channel
+        tests: [not_null]
+      - name: discount_amount
+        description: Extended amount less authoritative source sales amount.
+        tests: [not_null]
+      - name: gross_profit_amount
+        description: Sales amount less total product cost.
+        tests: [not_null]
+

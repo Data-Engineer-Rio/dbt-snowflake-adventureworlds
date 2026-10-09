@@ -1,0 +1,135 @@
+version: 2
+
+models:
+  - name: stg_sales
+    description: Typed and deduplicated sales order lines from the latest complete S3 batch.
+    columns:
+      - name: sales_order_line_key
+        description: Source-system unique key for a sales order line.
+        tests: [unique, not_null]
+      - name: reseller_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_reseller')
+                field: reseller_key
+      - name: customer_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_customer')
+                field: customer_key
+      - name: product_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_product')
+                field: product_key
+      - name: order_date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_date')
+                field: date_key
+      - name: due_date_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_date')
+                field: date_key
+      - name: ship_date_key
+        description: Nullable while an order line has not shipped.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('stg_date')
+                field: date_key
+      - name: sales_territory_key
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_sales_territory')
+                field: sales_territory_key
+      - name: order_quantity
+        tests: [not_null]
+      - name: unit_price
+        tests: [not_null]
+      - name: extended_amount
+        tests: [not_null]
+      - name: unit_price_discount_pct
+        tests: [not_null]
+      - name: product_standard_cost
+        tests: [not_null]
+      - name: total_product_cost
+        tests: [not_null]
+      - name: sales_amount
+        description: Authoritative source sales amount.
+        tests: [not_null]
+      - name: batch_id
+        tests: [not_null]
+
+  - name: stg_sales_order
+    description: Typed sales order labels and channel from the latest complete batch.
+    columns:
+      - name: sales_order_line_key
+        tests: [unique, not_null]
+      - name: channel
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Internet', 'Reseller']
+      - name: sales_order_number
+        tests: [not_null]
+
+  - name: stg_customer
+    description: Current customer source state used as input to the customer snapshot.
+    columns:
+      - name: customer_key
+        tests: [unique, not_null]
+      - name: customer_name
+        tests: [not_null]
+
+  - name: stg_reseller
+    description: Current reseller source state used as input to the reseller snapshot.
+    columns:
+      - name: reseller_key
+        tests: [unique, not_null]
+      - name: reseller_name
+        tests: [not_null]
+
+  - name: stg_product
+    description: Current product source state used as input to the product snapshot.
+    columns:
+      - name: product_key
+        tests: [unique, not_null]
+      - name: sku
+        tests: [not_null]
+      - name: product_name
+        tests: [not_null]
+      - name: standard_cost
+        tests: [not_null]
+      - name: list_price
+        tests: [not_null]
+
+  - name: stg_date
+    description: Conformed and typed calendar source.
+    columns:
+      - name: date_key
+        tests: [unique, not_null]
+      - name: date_value
+        tests: [unique, not_null]
+
+  - name: stg_sales_territory
+    description: Current territory source state used as input to the territory snapshot.
+    columns:
+      - name: sales_territory_key
+        tests: [unique, not_null]
+      - name: region
+        tests: [not_null]

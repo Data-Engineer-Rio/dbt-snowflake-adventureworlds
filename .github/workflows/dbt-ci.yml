@@ -1,0 +1,56 @@
+name: dbt CI
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "dbt/**"
+      - ".github/workflows/dbt-ci.yml"
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: adventureworks-dbt-ci
+  cancel-in-progress: false
+
+jobs:
+  build-and-test:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    environment: ci
+    env:
+      SNOWFLAKE_CLI_FEATURES_ENABLE_DBT: "true"
+      SNOWFLAKE_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+      SNOWFLAKE_DATABASE: ${{ vars.SNOWFLAKE_DATABASE }}
+      SNOWFLAKE_SCHEMA: ${{ vars.SNOWFLAKE_SCHEMA }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Snowflake CLI with OIDC
+        uses: snowflakedb/snowflake-actions@v3
+        with:
+          use-oidc: true
+
+      - name: Check CLI and connection
+        run: |
+          snow --version
+          snow connection test -x
+
+      - name: Deploy CI DBT PROJECT
+        run: >-
+          snow dbt deploy AW_ANALYTICS_CI
+          --source ./dbt
+          --default-target dev
+          --dbt-version 1.11.11
+          -x
+
+      - name: Build models and execute tests
+        run: >-
+          snow dbt execute -x
+          AW_ANALYTICS_CI build --target dev
+

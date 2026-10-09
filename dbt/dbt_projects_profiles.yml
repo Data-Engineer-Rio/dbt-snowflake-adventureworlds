@@ -1,0 +1,25 @@
+aw_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: "_"
+      user: "_"
+      role: AW_DBT_DEVELOPER
+      database: ADVENTUREWORKS_DE
+      schema: DEV
+      warehouse: TRANSFORM_WH
+      threads: 8
+      client_session_keep_alive: false
+
+    prod:
+      type: snowflake
+      account: "_"
+      user: "_"
+      role: AW_DBT_PROD
+      database: ADVENTUREWORKS_DE
+      schema: PROD
+      warehouse: TRANSFORM_WH
+      threads: 8
+      client_session_keep_alive: false
+

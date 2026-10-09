@@ -1,0 +1,27 @@
+USE ROLE ACCOUNTADMIN;
+
+CREATE USER IF NOT EXISTS AW_GITHUB_CI
+  TYPE = SERVICE
+  WORKLOAD_IDENTITY = (
+    TYPE = OIDC
+    ISSUER = 'https://token.actions.githubusercontent.com'
+    SUBJECT = 'repo:<GITHUB_ORG>/<GITHUB_REPO>:environment:ci'
+  )
+  DEFAULT_ROLE = AW_CI_ROLE
+  DEFAULT_WAREHOUSE = TRANSFORM_WH
+  COMMENT = 'OIDC service user for AdventureWorks pull request checks';
+
+CREATE USER IF NOT EXISTS AW_GITHUB_CD
+  TYPE = SERVICE
+  WORKLOAD_IDENTITY = (
+    TYPE = OIDC
+    ISSUER = 'https://token.actions.githubusercontent.com'
+    SUBJECT = 'repo:<GITHUB_ORG>/<GITHUB_REPO>:environment:prod'
+  )
+  DEFAULT_ROLE = AW_CD_ROLE
+  DEFAULT_WAREHOUSE = TRANSFORM_WH
+  COMMENT = 'OIDC service user for AdventureWorks production deployment';
+
+GRANT ROLE AW_CI_ROLE TO USER AW_GITHUB_CI;
+GRANT ROLE AW_CD_ROLE TO USER AW_GITHUB_CD;
+
